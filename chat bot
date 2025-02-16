@@ -1,0 +1,63 @@
+!pip install nltk
+import nltk
+import random
+
+# Download necessary NLTK data
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('maxent_ne_chunk')
+nltk.download('words')
+
+# Define greetings and responses
+greetings = ["hello", "hi", "hey", "howdy", "greetings"]
+responses = ["hi there!", "hello!", "hey!", "how are you?", "nice to meet you!"]
+
+# Function to check for greetings
+def check_for_greeting(user_input):
+  for word in user_input.split():
+    if word.lower() in greetings:
+      return random.choice(responses)
+  return None
+
+# Function to extract keywords and entities
+def extract_keywords(user_input):
+  tokens = nltk.word_tokenize(user_input)
+  tagged_tokens = nltk.pos_tag(tokens)
+  named_entities = nltk.ne_chunk(tagged_tokens)
+
+  keywords = []
+  for entity in named_entities:
+    if hasattr(entity, 'label'):
+      keywords.append(entity[0][0])  # Extract entity name
+    else:
+      if entity[1] in ['NN', 'NNS', 'NNP', 'NNPS']:  # Extract nouns
+        keywords.append(entity[0])
+
+  return keywords
+
+# Function to generate a response
+def generate_response(user_input):
+  greeting_response = check_for_greeting(user_input)
+  if greeting_response:
+    return greeting_response
+
+  keywords = extract_keywords(user_input)
+
+  # Basic question-answering logic (expand this as needed)
+  if "name" in keywords:
+    return "My name is ChatBot!"
+  elif "weather" in keywords:
+    return "I'm sorry, I don't have access to weather information."
+  else:
+    return "I'm not sure I understand. Can you rephrase your question?"
+
+# Main chatbot loop
+print("ChatBot: Hello! How can I help you today?")
+while True:
+  user_input = input("You: ")
+  if user_input.lower() == "bye":
+    print("ChatBot: Goodbye!")
+    break
+  else:
+    response = generate_response(user_input)
+    print("ChatBot:", response)
